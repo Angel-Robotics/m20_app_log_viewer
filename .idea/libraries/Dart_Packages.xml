@@ -177,13 +177,6 @@
             </list>
           </value>
         </entry>
-        <entry key="desktop_drop">
-          <value>
-            <list>
-              <option value="$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/desktop_drop-0.2.0/lib" />
-            </list>
-          </value>
-        </entry>
         <entry key="fake_async">
           <value>
             <list>
@@ -208,7 +201,7 @@
         <entry key="file_picker">
           <value>
             <list>
-              <option value="$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/file_picker-4.2.4/lib" />
+              <option value="$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/file_picker-4.2.5/lib" />
             </list>
           </value>
         </entry>
@@ -653,11 +646,10 @@
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/crypto-3.0.1/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/cupertino_icons-1.0.4/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/dart_style-2.2.0/lib" />
-      <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/desktop_drop-0.2.0/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/fake_async-1.2.0/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/ffi-1.1.2/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/file-6.1.2/lib" />
-      <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/file_picker-4.2.4/lib" />
+      <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/file_picker-4.2.5/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/fixnum-1.0.0/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_lints-1.0.4/lib" />
       <root url="file://$USER_HOME$/development/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-2.0.5/lib" />

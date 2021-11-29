@@ -40,7 +40,6 @@ dependencies:
   path: any
   path_provider: any
   archive: ^3.1.6
-  desktop_drop: any
   file_picker: any
   get: ^4.3.8
 
