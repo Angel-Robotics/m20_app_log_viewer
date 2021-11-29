@@ -20,6 +20,8 @@ class FileLoaderScreen extends StatefulWidget {
 }
 
 class _FileLoaderScreenState extends State<FileLoaderScreen> {
+  String loadingProcessText = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,6 +77,9 @@ class _FileLoaderScreenState extends State<FileLoaderScreen> {
                     }
                   }
 
+                  setState(() {
+                    loadingProcessText = "";
+                  });
                   for (var i in fileItems) {
                     String name = i.path.split("/").last;
                     String type = name.split("_")[1];
@@ -84,16 +89,21 @@ class _FileLoaderScreenState extends State<FileLoaderScreen> {
                     if (type == "robot") {
                       await restoreHiveBox<RobotSWLog>("log_robot_box", i.path);
                       print("Restore robot log");
+                      loadingProcessText += "로봇 로그 읽기 완료\n";
                     } else if (type == "system") {
                       await restoreHiveBox<SystemLog>("log_system_box", i.path);
                       print("Restore log_system_box log");
+                      loadingProcessText += "태블릿 시스템 로그 읽기 완료\n";
                     } else if (type == "exception") {
                       await restoreHiveBox<TabletExceptionLog>("log_exception_box", i.path);
                       print("Restore log_exception_box log");
+                      loadingProcessText += "태블릿 예외 로그 읽기 완료\n";
                     } else if (type == "caller") {
                       await restoreHiveBox<TabletCallerLog>("log_caller_box", i.path);
                       print("Restore log_caller_box log");
+                      loadingProcessText += "태블릿 함수 로그 읽기 완료\n";
                     }
+                    setState(() {});
                   }
                   Get.to(const LogViewerScreen());
                 } else {
@@ -103,6 +113,10 @@ class _FileLoaderScreenState extends State<FileLoaderScreen> {
               child: const Text("로그파일 불러오기"),
             ),
           ),
+          SizedBox(
+            height: 16,
+          ),
+          Text(loadingProcessText),
         ],
       ),
     );
