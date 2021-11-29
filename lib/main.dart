@@ -16,7 +16,7 @@ Future<void> restoreHiveBox<T>(String boxName, String backupPath) async {
   await box.close();
 
   try {
-    File(backupPath).copy(boxPath!);
+    await File(backupPath).copy(boxPath!);
   } finally {
     await Hive.openBox<T>(boxName);
   }
@@ -38,12 +38,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return const GetMaterialApp(
       title: 'M20 App Log Viewer',
-      // theme: ThemeData(
-      //   primarySwatch: Colors.blue,
-      // ),
-      home: const FileLoaderScreen()
+      debugShowCheckedModeBanner: false,
+      home: FileLoaderScreen()
     );
   }
 }

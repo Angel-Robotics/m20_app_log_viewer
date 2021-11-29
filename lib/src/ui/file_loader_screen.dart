@@ -30,20 +30,20 @@ class _FileLoaderScreenState extends State<FileLoaderScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ElevatedButton(
-            onPressed: () async {
-              print(await getDownloadsDirectory());
-              // print(await getExternalStorageDirectory());
-              print(await getTemporaryDirectory());
-              print(await getLibraryDirectory());
-              print(await getApplicationDocumentsDirectory());
-              print(await getApplicationSupportDirectory());
-            },
-            child: const Text("데스크톱 패스 확인"),
-          ),
-          const SizedBox(
-            height: 24,
-          ),
+          // ElevatedButton(
+          //   onPressed: () async {
+          //     print(await getDownloadsDirectory());
+          //     // print(await getExternalStorageDirectory());
+          //     print(await getTemporaryDirectory());
+          //     print(await getLibraryDirectory());
+          //     print(await getApplicationDocumentsDirectory());
+          //     print(await getApplicationSupportDirectory());
+          //   },
+          //   child: const Text("데스크톱 패스 확인"),
+          // ),
+          // const SizedBox(
+          //   height: 24,
+          // ),
           Center(
             child: ElevatedButton(
               onPressed: () async {
@@ -78,15 +78,21 @@ class _FileLoaderScreenState extends State<FileLoaderScreen> {
                   for (var i in fileItems) {
                     String name = i.path.split("/").last;
                     String type = name.split("_")[1];
+                    print("name: $name");
+                    print("type: $type");
 
                     if (type == "robot") {
                       await restoreHiveBox<RobotSWLog>("log_robot_box", i.path);
+                      print("Restore robot log");
                     } else if (type == "system") {
                       await restoreHiveBox<SystemLog>("log_system_box", i.path);
+                      print("Restore log_system_box log");
                     } else if (type == "exception") {
                       await restoreHiveBox<TabletExceptionLog>("log_exception_box", i.path);
+                      print("Restore log_exception_box log");
                     } else if (type == "caller") {
                       await restoreHiveBox<TabletCallerLog>("log_caller_box", i.path);
+                      print("Restore log_caller_box log");
                     }
                   }
                   Get.to(const LogViewerScreen());
