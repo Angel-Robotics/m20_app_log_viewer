@@ -234,7 +234,6 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                           },
                         );
                       },
-
                     ),
                   ),
                 ],
