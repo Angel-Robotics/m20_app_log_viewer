@@ -48,6 +48,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       // _systemLog = systemLogs;
                       return ListView.separated(
                         itemCount: systemLogs.length,
+                        controller: ScrollController(),
                         separatorBuilder: (context, index) => const Divider(height: 8, color: Colors.grey),
                         itemBuilder: (context, index) {
                           return Padding(
@@ -81,6 +82,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     builder: (BuildContext context, value, Widget? child) {
                       var systemLogs = value.values.toList().cast<RobotSWLog>().reversed.toList();
                       return ListView.separated(
+                        controller: ScrollController(),
                         separatorBuilder: (context, index)=>const Divider(),
                         itemCount: systemLogs.length,
                         itemBuilder: (context, index) {
@@ -98,6 +100,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     builder: (BuildContext context, value, Widget? child) {
                       var systemLogs = value.values.toList().cast<TabletExceptionLog>().reversed.toList();
                       return ListView.separated(
+                        controller: ScrollController(),
                         itemCount: systemLogs.length,
                         itemBuilder: (context, index) {
                           // print(systemLogs[index]);
@@ -121,6 +124,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       var systemLogs = value.values.toList().cast<TabletCallerLog>().reversed.toList();
                       // _systemLog = systemLogs;
                       return ListView.separated(
+                        controller: ScrollController(),
                         itemCount: systemLogs.length,
                         separatorBuilder: (context, index) => const Divider(
                           height: 8,
