@@ -43,29 +43,57 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
             ]),
             Expanded(
               child: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(32),
-                          ),
-                          child: TextField(
-                            controller: systemLogTextController.textEditingController,
-                            decoration: const InputDecoration(
-                              hintText: "Search",
-                              border: InputBorder.none,
-                              icon: Icon(Icons.search),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(32),
+                                ),
+                                child: TextField(
+                                  controller: systemLogTextController.textEditingController,
+                                  decoration: const InputDecoration(
+                                    hintText: "Search",
+                                    border: InputBorder.none,
+                                    icon: Icon(Icons.search),
+                                  ),
+                                  onSubmitted: (result) {
+                                    // print(result);
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
                             ),
-                            onSubmitted: (result) {
-                              // print(result);
-                              setState(() {});
-                            },
-                          ),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  DateTime? dt = await showDatePicker(
+                                      context: context, initialDate: DateTime.now(), firstDate: DateTime(2019), lastDate: DateTime.now());
+                                  systemLogTextController.searchDateTime = dt;
+                                  setState(() {});
+                                },
+                                child: const Text("날짜선택")),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  systemLogTextController.searchDateTime = null;
+                                  systemLogTextController.textEditingController.clear();
+                                  setState(() {});
+                                },
+                                child: const Text("초기화"))
+                          ],
                         ),
                         const SizedBox(height: 16),
                         Expanded(
@@ -78,6 +106,12 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                                 systemLogs = systemLogs
                                     .where((element) => (element.log?.toUpperCase() ?? "")
                                         .contains(systemLogTextController.textEditingController.text.trim().toUpperCase()))
+                                    .toList();
+                              }
+                              if (systemLogTextController.searchDateTime != null) {
+                                systemLogs = systemLogs
+                                    .where((element) => (element.datetime?.split(" ").first.toUpperCase() ?? "")
+                                        .contains(systemLogTextController.searchDateTime.toString().split(" ").first.toUpperCase()))
                                     .toList();
                               }
 
@@ -116,82 +150,92 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       ],
                     ),
                   ),
-                  ValueListenableBuilder<Box<RobotSWLog>>(
-                    valueListenable: Hive.box<RobotSWLog>('log_robot_box').listenable(),
-                    builder: (BuildContext context, value, Widget? child) {
-                      var systemLogs = value.values.toList().cast<RobotSWLog>().reversed.toList();
-                      return ListView.separated(
-                        controller: ScrollController(),
-                        separatorBuilder: (context, index) => const Divider(),
-                        itemCount: systemLogs.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                                "$index | ${systemLogs[index].timestamp} | ${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp! * 1000).toUtc()} | ${systemLogs[index].level} | ${systemLogs[index].log} | ${systemLogs[index].info0} | ${systemLogs[index].info1}"),
-                          );
-                        },
-                      );
-                    },
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ValueListenableBuilder<Box<RobotSWLog>>(
+                      valueListenable: Hive.box<RobotSWLog>('log_robot_box').listenable(),
+                      builder: (BuildContext context, value, Widget? child) {
+                        var systemLogs = value.values.toList().cast<RobotSWLog>().reversed.toList();
+                        return ListView.separated(
+                          controller: ScrollController(),
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemCount: systemLogs.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  "$index | ${systemLogs[index].timestamp} | ${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp! * 1000).toUtc()} | ${systemLogs[index].level} | ${systemLogs[index].log} | ${systemLogs[index].info0} | ${systemLogs[index].info1}"),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
-                  ValueListenableBuilder<Box<TabletExceptionLog>>(
-                    valueListenable: Hive.box<TabletExceptionLog>('log_exception_box').listenable(),
-                    builder: (BuildContext context, value, Widget? child) {
-                      var systemLogs = value.values.toList().cast<TabletExceptionLog>().reversed.toList();
-                      return ListView.separated(
-                        controller: ScrollController(),
-                        itemCount: systemLogs.length,
-                        itemBuilder: (context, index) {
-                          // print(systemLogs[index]);
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child:
-                                Text("${systemLogs[index].timestamp} (${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp!)})"
-                                    // "\n${systemLogs[index].exception}"
-                                    "\n${systemLogs[index].exception!.split("|").first}"
-                                    "\n${systemLogs[index].exception!.split("|").last}"),
-                          );
-                        },
-                        separatorBuilder: (BuildContext context, int index) {
-                          return const Divider(color: Colors.black);
-                        },
-                      );
-                    },
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ValueListenableBuilder<Box<TabletExceptionLog>>(
+                      valueListenable: Hive.box<TabletExceptionLog>('log_exception_box').listenable(),
+                      builder: (BuildContext context, value, Widget? child) {
+                        var systemLogs = value.values.toList().cast<TabletExceptionLog>().reversed.toList();
+                        return ListView.separated(
+                          controller: ScrollController(),
+                          itemCount: systemLogs.length,
+                          itemBuilder: (context, index) {
+                            // print(systemLogs[index]);
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  "${systemLogs[index].timestamp} (${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp!)})"
+                                  // "\n${systemLogs[index].exception}"
+                                  "\n${systemLogs[index].exception!.split("|").first}"
+                                  "\n${systemLogs[index].exception!.split("|").last}"),
+                            );
+                          },
+                          separatorBuilder: (BuildContext context, int index) {
+                            return const Divider(color: Colors.black);
+                          },
+                        );
+                      },
+                    ),
                   ),
-                  ValueListenableBuilder<Box<TabletCallerLog>>(
-                    builder: (BuildContext context, value, Widget? child) {
-                      var systemLogs = value.values.toList().cast<TabletCallerLog>().reversed.toList();
-                      // _systemLog = systemLogs;
-                      return ListView.separated(
-                        controller: ScrollController(),
-                        itemCount: systemLogs.length,
-                        separatorBuilder: (context, index) => const Divider(
-                          height: 8,
-                          color: Colors.grey,
-                        ),
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    systemLogs[index].exception ?? "-",
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ValueListenableBuilder<Box<TabletCallerLog>>(
+                      valueListenable: Hive.box<TabletCallerLog>('log_caller_box').listenable(),
+                      builder: (BuildContext context, value, Widget? child) {
+                        var systemLogs = value.values.toList().cast<TabletCallerLog>().reversed.toList();
+                        // _systemLog = systemLogs;
+                        return ListView.separated(
+                          controller: ScrollController(),
+                          itemCount: systemLogs.length,
+                          separatorBuilder: (context, index) => const Divider(
+                            height: 8,
+                            color: Colors.grey,
+                          ),
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      systemLogs[index].exception ?? "-",
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                  Text(
+                                    "${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp ?? 0)} (${systemLogs[index].timestamp ?? 0})",
                                     style: const TextStyle(fontSize: 12),
                                   ),
-                                ),
-                                Text(
-                                  "${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp ?? 0)} (${systemLogs[index].timestamp ?? 0})",
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    valueListenable: Hive.box<TabletCallerLog>('log_caller_box').listenable(),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+
+                    ),
                   ),
                 ],
               ),
