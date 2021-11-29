@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:m20_app_log_viewer/src/controller/system_log_text_controller.dart';
 import 'package:m20_app_log_viewer/src/db/adapter/system_log.dart';
 
 import '../db/adapter/robot_sw_log.dart';
@@ -16,6 +18,7 @@ class LogViewerScreen extends StatefulWidget {
 class _LogViewerScreenState extends State<LogViewerScreen> {
   @override
   Widget build(BuildContext context) {
+    final systemLogTextController = Get.put(SystemLogTextController());
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -41,41 +44,77 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
             Expanded(
               child: TabBarView(
                 children: [
-                  ValueListenableBuilder<Box<SystemLog>>(
-                    valueListenable: Hive.box<SystemLog>('log_system_box').listenable(),
-                    builder: (BuildContext context, value, Widget? child) {
-                      var systemLogs = value.values.toList().cast<SystemLog>().reversed.toList();
-                      // _systemLog = systemLogs;
-                      return ListView.separated(
-                        itemCount: systemLogs.length,
-                        controller: ScrollController(),
-                        separatorBuilder: (context, index) => const Divider(height: 8, color: Colors.grey),
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    systemLogs[index].datetime ?? "-",
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 16,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    systemLogs[index].log ?? "-",
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ],
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(32),
+                          ),
+                          child: TextField(
+                            controller: systemLogTextController.textEditingController,
+                            decoration: const InputDecoration(
+                              hintText: "Search",
+                              border: InputBorder.none,
+                              icon: Icon(Icons.search),
                             ),
-                          );
-                        },
-                      );
-                    },
+                            onSubmitted: (result) {
+                              // print(result);
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: ValueListenableBuilder<Box<SystemLog>>(
+                            valueListenable: Hive.box<SystemLog>('log_system_box').listenable(),
+                            builder: (BuildContext context, value, Widget? child) {
+                              var systemLogs = value.values.toList().cast<SystemLog>().reversed.toList();
+                              // _systemLog = systemLogs;
+                              if (systemLogTextController.textEditingController.text.isNotEmpty) {
+                                systemLogs = systemLogs
+                                    .where((element) => (element.log?.toUpperCase() ?? "")
+                                        .contains(systemLogTextController.textEditingController.text.trim().toUpperCase()))
+                                    .toList();
+                              }
+
+                              return ListView.separated(
+                                itemCount: systemLogs.length,
+                                controller: ScrollController(),
+                                separatorBuilder: (context, index) => const Divider(height: 8, color: Colors.grey),
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            systemLogs[index].datetime ?? "-",
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 16,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            systemLogs[index].log ?? "-",
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   ValueListenableBuilder<Box<RobotSWLog>>(
                     valueListenable: Hive.box<RobotSWLog>('log_robot_box').listenable(),
@@ -83,7 +122,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       var systemLogs = value.values.toList().cast<RobotSWLog>().reversed.toList();
                       return ListView.separated(
                         controller: ScrollController(),
-                        separatorBuilder: (context, index)=>const Divider(),
+                        separatorBuilder: (context, index) => const Divider(),
                         itemCount: systemLogs.length,
                         itemBuilder: (context, index) {
                           return Padding(
@@ -106,11 +145,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                           // print(systemLogs[index]);
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                                "${systemLogs[index].timestamp} (${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp!)})"
-                                // "\n${systemLogs[index].exception}"
-                                "\n${systemLogs[index].exception!.split("|").first}"
-                                "\n${systemLogs[index].exception!.split("|").last}"),
+                            child:
+                                Text("${systemLogs[index].timestamp} (${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp!)})"
+                                    // "\n${systemLogs[index].exception}"
+                                    "\n${systemLogs[index].exception!.split("|").first}"
+                                    "\n${systemLogs[index].exception!.split("|").last}"),
                           );
                         },
                         separatorBuilder: (BuildContext context, int index) {
