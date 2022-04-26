@@ -46,71 +46,88 @@ class _FileLoaderScreenState extends State<FileLoaderScreen> {
           // const SizedBox(
           //   height: 24,
           // ),
-          Center(
-            child: ElevatedButton(
-              onPressed: () async {
-                FilePickerResult? result = await FilePicker.platform.pickFiles();
+          Expanded(child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: const [
+                Expanded(
+                  child: Card(
+                    elevation: 2,
+                    child: Center(child: Text("시스템로그 읽기")),
+                  ),
+                )
 
-                if (result != null) {
-                  File file = File(result.files.single.path ?? "");
-                  print(file);
+              ],
+            ),
+          )),
+          Divider(),
+          Expanded(
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-                  final bytes = file.readAsBytesSync();
+                  if (result != null) {
+                    File file = File(result.files.single.path ?? "");
+                    print(file);
 
-                  // Decode the Zip file
-                  final archive = ZipDecoder().decodeBytes(bytes);
+                    final bytes = file.readAsBytesSync();
 
-                  // Extract the contents of the Zip archive to disk.
-                  var d = await getDownloadsDirectory();
-                  List<File> fileItems = [];
-                  for (final file in archive) {
-                    final filename = file.name;
-                    fileItems.add(File('${d!.path}/' + filename));
-                    if (file.isFile) {
-                      final data = file.content as List<int>;
+                    // Decode the Zip file
+                    final archive = ZipDecoder().decodeBytes(bytes);
 
-                      File('${d.path}/' + filename)
-                        ..createSync(recursive: true)
-                        ..writeAsBytesSync(data);
-                    } else {
-                      Directory('${d.path}/' + filename).create(recursive: true);
+                    // Extract the contents of the Zip archive to disk.
+                    var d = await getDownloadsDirectory();
+                    List<File> fileItems = [];
+                    for (final file in archive) {
+                      final filename = file.name;
+                      fileItems.add(File('${d!.path}/' + filename));
+                      if (file.isFile) {
+                        final data = file.content as List<int>;
+
+                        File('${d.path}/' + filename)
+                          ..createSync(recursive: true)
+                          ..writeAsBytesSync(data);
+                      } else {
+                        Directory('${d.path}/' + filename).create(recursive: true);
+                      }
                     }
-                  }
 
-                  setState(() {
-                    loadingProcessText = "";
-                  });
-                  for (var i in fileItems) {
-                    String name = i.path.split("/").last;
-                    String type = name.split("_")[1];
-                    print("name: $name");
-                    print("type: $type");
+                    setState(() {
+                      loadingProcessText = "";
+                    });
+                    for (var i in fileItems) {
+                      String name = i.path.split("/").last;
+                      String type = name.split("_")[1];
+                      print("name: $name");
+                      print("type: $type");
 
-                    if (type == "robot") {
-                      await restoreHiveBox<RobotSWLog>("log_robot_box", i.path);
-                      print("Restore robot log");
-                      loadingProcessText += "로봇 로그 읽기 완료\n";
-                    } else if (type == "system") {
-                      await restoreHiveBox<SystemLog>("log_system_box", i.path);
-                      print("Restore log_system_box log");
-                      loadingProcessText += "태블릿 시스템 로그 읽기 완료\n";
-                    } else if (type == "exception") {
-                      await restoreHiveBox<TabletExceptionLog>("log_exception_box", i.path);
-                      print("Restore log_exception_box log");
-                      loadingProcessText += "태블릿 예외 로그 읽기 완료\n";
-                    } else if (type == "caller") {
-                      await restoreHiveBox<TabletCallerLog>("log_caller_box", i.path);
-                      print("Restore log_caller_box log");
-                      loadingProcessText += "태블릿 함수 로그 읽기 완료\n";
+                      if (type == "robot") {
+                        await restoreHiveBox<RobotSWLog>("log_robot_box", i.path);
+                        print("Restore robot log");
+                        loadingProcessText += "로봇 로그 읽기 완료\n";
+                      } else if (type == "system") {
+                        await restoreHiveBox<SystemLog>("log_system_box", i.path);
+                        print("Restore log_system_box log");
+                        loadingProcessText += "태블릿 시스템 로그 읽기 완료\n";
+                      } else if (type == "exception") {
+                        await restoreHiveBox<TabletExceptionLog>("log_exception_box", i.path);
+                        print("Restore log_exception_box log");
+                        loadingProcessText += "태블릿 예외 로그 읽기 완료\n";
+                      } else if (type == "caller") {
+                        await restoreHiveBox<TabletCallerLog>("log_caller_box", i.path);
+                        print("Restore log_caller_box log");
+                        loadingProcessText += "태블릿 함수 로그 읽기 완료\n";
+                      }
+                      setState(() {});
                     }
-                    setState(() {});
+                    Get.to(const LogViewerScreen());
+                  } else {
+                    // User canceled the picker
                   }
-                  Get.to(const LogViewerScreen());
-                } else {
-                  // User canceled the picker
-                }
-              },
-              child: const Text("로그파일 불러오기"),
+                },
+                child: const Text("원본 압축 파일 불러오기"),
+              ),
             ),
           ),
           SizedBox(
