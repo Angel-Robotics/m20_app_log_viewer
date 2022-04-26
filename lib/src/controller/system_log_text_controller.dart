@@ -5,3 +5,8 @@ class SystemLogTextController extends GetxController {
   final TextEditingController textEditingController = TextEditingController();
   DateTime? searchDateTime;
 }
+
+class CallerLogTextController extends GetxController {
+  final TextEditingController textEditingController = TextEditingController();
+  DateTime? searchDateTime;
+}

@@ -19,6 +19,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   @override
   Widget build(BuildContext context) {
     final systemLogTextController = Get.put(SystemLogTextController());
+    final callerLogTextController = Get.put(CallerLogTextController());
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -78,7 +79,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                             ElevatedButton(
                                 onPressed: () async {
                                   DateTime? dt = await showDatePicker(
-                                      context: context, initialDate: DateTime.now(), firstDate: DateTime(2019), lastDate: DateTime.now());
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2019),
+                                    lastDate: DateTime.now(),
+                                  );
                                   systemLogTextController.searchDateTime = dt;
                                   setState(() {});
                                 },
@@ -104,14 +109,18 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                               // _systemLog = systemLogs;
                               if (systemLogTextController.textEditingController.text.isNotEmpty) {
                                 systemLogs = systemLogs
-                                    .where((element) => (element.log?.toUpperCase() ?? "")
-                                        .contains(systemLogTextController.textEditingController.text.trim().toUpperCase()))
+                                    .where((element) => (element.log?.toUpperCase() ?? "").contains(
+                                        systemLogTextController.textEditingController.text.trim().toUpperCase()))
                                     .toList();
                               }
                               if (systemLogTextController.searchDateTime != null) {
                                 systemLogs = systemLogs
                                     .where((element) => (element.datetime?.split(" ").first.toUpperCase() ?? "")
-                                        .contains(systemLogTextController.searchDateTime.toString().split(" ").first.toUpperCase()))
+                                        .contains(systemLogTextController.searchDateTime
+                                            .toString()
+                                            .split(" ")
+                                            .first
+                                            .toUpperCase()))
                                     .toList();
                               }
 
@@ -125,7 +134,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                                     child: Row(
                                       children: [
                                         Expanded(
-                                          child: Text(
+                                          child: SelectableText(
                                             systemLogs[index].datetime ?? "-",
                                             style: const TextStyle(fontSize: 12),
                                           ),
@@ -134,7 +143,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                                           width: 16,
                                         ),
                                         Expanded(
-                                          child: Text(
+                                          child: SelectableText(
                                             systemLogs[index].log ?? "-",
                                             style: const TextStyle(fontSize: 12),
                                           ),
@@ -200,40 +209,114 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ValueListenableBuilder<Box<TabletCallerLog>>(
-                      valueListenable: Hive.box<TabletCallerLog>('log_caller_box').listenable(),
-                      builder: (BuildContext context, value, Widget? child) {
-                        var systemLogs = value.values.toList().cast<TabletCallerLog>().reversed.toList();
-                        // _systemLog = systemLogs;
-                        return ListView.separated(
-                          controller: ScrollController(),
-                          itemCount: systemLogs.length,
-                          separatorBuilder: (context, index) => const Divider(
-                            height: 8,
-                            color: Colors.grey,
-                          ),
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      systemLogs[index].exception ?? "-",
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(32),
+                                ),
+                                child: TextField(
+                                  controller: callerLogTextController.textEditingController,
+                                  decoration: const InputDecoration(
+                                    hintText: "Search",
+                                    border: InputBorder.none,
+                                    icon: Icon(Icons.search),
                                   ),
-                                  Text(
-                                    "${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp ?? 0)} (${systemLogs[index].timestamp ?? 0})",
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
+                                  onSubmitted: (result) {
+                                    // print(result);
+                                    setState(() {});
+                                  },
+                                ),
                               ),
-                            );
-                          },
-                        );
-                      },
+                            ),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  DateTime? dt = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2019),
+                                    lastDate: DateTime.now(),
+                                  );
+                                  callerLogTextController.searchDateTime = dt;
+                                  setState(() {});
+                                },
+                                child: const Text("날짜선택")),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  callerLogTextController.searchDateTime = null;
+                                  callerLogTextController.textEditingController.clear();
+                                  setState(() {});
+                                },
+                                child: const Text("초기화"))
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: ValueListenableBuilder<Box<TabletCallerLog>>(
+                            valueListenable: Hive.box<TabletCallerLog>('log_caller_box').listenable(),
+                            builder: (BuildContext context, value, Widget? child) {
+                              var systemLogs = value.values.toList().cast<TabletCallerLog>().reversed.toList();
+                              // _systemLog = systemLogs;
+
+                              if (callerLogTextController.textEditingController.text.isNotEmpty) {
+                                systemLogs = systemLogs
+                                    .where((element) => (element.exception?.toUpperCase() ?? "").contains(
+                                    callerLogTextController.textEditingController.text.trim().toUpperCase()))
+                                    .toList();
+                              }
+                              if (callerLogTextController.searchDateTime != null) {
+                                systemLogs = systemLogs
+                                    .where((element) => (DateTime.fromMillisecondsSinceEpoch(element.timestamp ?? 0).toString().split(" ").first.toUpperCase() )
+                                    .contains(callerLogTextController.searchDateTime
+                                    .toString()
+                                    .split(" ")
+                                    .first
+                                    .toUpperCase()))
+                                    .toList();
+                              }
+                              return ListView.separated(
+                                controller: ScrollController(),
+                                itemCount: systemLogs.length,
+                                separatorBuilder: (context, index) => const Divider(
+                                  height: 8,
+                                  color: Colors.grey,
+                                ),
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: SelectableText(
+                                            systemLogs[index].exception ?? "-",
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                        Text(
+                                          "${DateTime.fromMillisecondsSinceEpoch(systemLogs[index].timestamp ?? 0)} (${systemLogs[index].timestamp ?? 0})",
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
